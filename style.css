@@ -9,19 +9,12 @@
 	box-sizing: border-box;
 }
 
-.sidebar a {
-	display: block;
-	color: #333;
-	text-decoration: none;
-	margin-bottom: 12px;
-}
-
-.sidebar a:hover {
-	color: #007bff;
-}
-
 .content {
 	margin-left: 150px;
 	padding: 40px;
 	flex-grow: 1;
+}
+
+.hidden {
+  display: none !important;
 }
