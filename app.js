@@ -10,6 +10,8 @@ async function loadDatabase() {
 
 	db = new SQL.Database(new Uint8Array(buffer));
 	
+	console.log("db loaded");
+	
 	handleRoute();
 }
 
@@ -17,10 +19,14 @@ function handleRoute(){
 	//hide all mutually exclusive sections (for item, tag, index)
 	document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
 	
+	
+	
 	const hash = window.location.hash;
 	const parts = hash.slice(1).split('/'); 
 	const route = parts[0];
 	const id = parts[1];
+	
+	console.log(`hash ${hash}`);
 	
 	switch(route){
 		case "item":
