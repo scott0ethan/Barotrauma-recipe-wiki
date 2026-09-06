@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>identifier</title>
+	
+	<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+	<nav class="sidebar">			
+        <a href="./index.html">Index</a>
+		
+		<h3>Contents:</h3>
+		<ul id="sidebar-contents"></ul>
+    </nav>
+
+	<main class="content">		
+		<section id="view-item-detail" class="view">
+			<h1 id="item-name">Item name</h1>
+			<h2 id="item-identifier">(item identifier)</h2>
+			<p id="item-variant">variant of</p>
+			<p id="item-description">description</p>
+			<p id="item-tags">tags</p>
+
+			<div id="item_recipes" class="subsection">
+				<h3>Crafted at:</h3>
+				<ul id="crafting-list"></ul>
+			</div>
+			
+			<div id="item_ingredient" class="subsection">
+				<h3>Used to make:</h3>
+				<ul id="ingredient-list"></ul>
+			</div>
+			
+			<div id="item_unlock" class="subsection">
+				<h3>Unlocks recipes for:</h3>
+				<ul id="unlock-list"></ul>
+			</div>
+			
+			<div id="item_deconstruct" class="subsection">
+				<h3>Deconstructs into:</h3>
+				<ul id="deconstruct-list"></ul>
+			</div>
+			
+			<div id="item_spawner" class="subsection">
+				<h3>This item has special behavior for spawning:</h3>
+				<ul id="spawn-list"></ul>
+			</div>
+			
+			<div id="item_fabricator" class="subsection">
+				<h3>This item is a fabricator for:</h3>
+				<ul id="fabricator-list"></ul>
+			</div>
+			
+		</section>
+	</main>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+	<script src="./app.js"></script>
+	
+</body>
+</html>
