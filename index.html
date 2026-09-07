@@ -3,49 +3,62 @@
 <html>
 <head>
     <meta charset="UTF-8">
+	<link rel="icon" type="image/png" href="/favicon.png">
     <title>page</title>
 	
 	<link rel="stylesheet" href="./style.css">
 </head>
 <body>
 	<nav class="sidebar">			
-        <a href="./index.html">Index</a>
+        <a href="./#index">To Index</a>
 		
 		<h3>Contents:</h3>
 		<ul id="sidebar-contents"></ul>
     </nav>
 
-	<main class="content">		
-		<section id="view-item-detail" class="view">
+	<main class="content">
+		<p id="error-display" role="alert"></p>
+	
+		<section id="index-view" class="view">
+			<h1>Index</h1>
+		</section>
+	
+		<section id="item-view" class="view">
 			<h1 id="item-name">Item name</h1>
-			<h2 id="item-identifier">(item identifier)</h2>
-			<p id="item-variant">variant of</p>
-			<p id="item-description">description</p>
-			<p id="item-tags">tags</p>
+			<h2 id="item-identifier">(item identifier)</h2>			
+			<p id="item-description">description</p>			
+			<p id="item-variant">Variant of <a id="item-variant-a" href="">item</a></p>
+			<p id="item-variants">Variants: </p>			
+			<p id="item-tags">Tags:</p>
 
-			<div id="item_recipes" class="subsection">
+			<div id="item-recipes" class="subsection">
 				<h3>Crafted at:</h3>
 				<ul id="crafting-list"></ul>
 			</div>
 			
-			<div id="item_ingredient" class="subsection">
+			<div id="item-deconstruct" class="subsection">
+				<h3>Deconstructed from:</h3>
+				<ul id="crafting-list"></ul>
+			</div>
+			
+			<div id="item-ingredient" class="subsection">
 				<h3>Used to make:</h3>
 				<ul id="ingredient-list"></ul>
 			</div>
 			
-			<div id="item_unlock" class="subsection">
-				<h3>Unlocks recipes for:</h3>
-				<ul id="unlock-list"></ul>
-			</div>
-			
-			<div id="item_deconstruct" class="subsection">
+			<div id="item_deconstruct-from" class="subsection">
 				<h3>Deconstructs into:</h3>
-				<ul id="deconstruct-list"></ul>
+				<ul id="deconstruct-from-list"></ul>
 			</div>
 			
 			<div id="item_spawner" class="subsection">
 				<h3>This item has special behavior for spawning:</h3>
 				<ul id="spawn-list"></ul>
+			</div>
+			
+			<div id="item_unlock" class="subsection">
+				<h3>Unlocks recipes for:</h3>
+				<ul id="unlock-list"></ul>
 			</div>
 			
 			<div id="item_fabricator" class="subsection">

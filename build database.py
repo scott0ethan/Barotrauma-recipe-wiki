@@ -28,13 +28,13 @@ def get_attribute_comma_list(element, attributes):
     return _list
 
 def xml_to_dict(root):
-    json = {
+    _json = {
         "tag": root.tag,
         "text": root.text.strip() if root.text and root.text.strip() else None,
-        "attributes": root.attrib,
+        "attributes": {str(k).lower(): str(v) for k, v in root.attrib.items()},
         "children": [xml_to_dict(c) for c in root]
         }
-    return json
+    return _json
 
 def process_xml_tree(root_directory, callback):
     for dirpath, _, filenames in os.walk(root_directory):
@@ -117,8 +117,8 @@ def process_item(item, filepath, conn, cursor, filelist):
     existing = cursor.fetchone()
     if existing:
         old_id, old_filepath = existing
-        print(f'encountered an already existing item identifier: {identifier} in {filepath}')        
-        print(f'\tpreviouslt at {old_filepath}')
+        #print(f'encountered an already existing item identifier: {identifier} in {filepath}')        
+        #print(f'\tpreviouslt at {old_filepath}')
         #must be a mod override, remove the existing entry and all information given by the old item's xml.
         #keep information from other items that reference this item since its identifier has not changed.
         cursor.execute("DELETE FROM items WHERE identifier = ?", [identifier])
@@ -135,7 +135,7 @@ def process_item(item, filepath, conn, cursor, filelist):
     name = get_attribute_comma_list(item, ["name", "Name"])
     json_string = json.dumps(xml_to_dict(item))
     cursor.execute(
-        "INSERT INTO items (identifier, nameidentifier, name, xml_data, filelist, filepath) VALUES (?, ?, ?, jsonb(?), ?, ?);",
+        "INSERT INTO items (identifier, nameidentifier, name, json_data, filelist, filepath) VALUES (?, ?, ?, ?, ?, ?);",
         (identifier,
         nameidentifier[0] if nameidentifier else None,
         name[0] if name else None,
@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS items (
     identifier TEXT PRIMARY KEY,
     nameidentifier TEXT,
     name TEXT,
-    xml_data BLOB,  -- Stored as JSON string
+    json_data TEXT,
     filelist TEXT,
     filepath TEXT
 );
@@ -355,3 +355,4 @@ process_xml_tree(
 
 conn.close()
 print("DONE")
+
