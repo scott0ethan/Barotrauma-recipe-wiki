@@ -18,3 +18,27 @@
 .hidden {
   display: none !important;
 }
+
+.code-block {
+  /* Typography & Whitespace */
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875rem;       /* ~14px */
+  line-height: 1.5;
+  white-space: pre;          /* Preserves tabs and newlines without auto-wrapping */
+  tab-size: 4;               /* Keeps tab indents compact */
+
+  /* Layout & Containment */
+  display: block;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;         /* Provides horizontal scrolling for long lines */
+
+  /* Surface Styling */
+  background-color: #1e1e1e; /* Dark theme default for code readability */
+  color: #d4d4d4;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  
+  /* Rendering Polish */
+  -webkit-font-smoothing: antialiased;
+}

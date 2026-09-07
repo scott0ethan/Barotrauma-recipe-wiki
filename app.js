@@ -36,7 +36,9 @@ function handleRoute(){
 		case "tag":
 			renderTagDetails(id);
 			break;
-			
+		case "talent":
+			renderTalentDetails(id);
+			break
 		default:
 		case "index":
 			renderIndexDetails();
@@ -77,10 +79,26 @@ function get_translated_name(id, fallback=null){
 	return name;
 }
 
+function json_object_to_xml_string(obj, indent=''){
+	let attr_string = '';
+	Object.entries(obj.attributes).forEach(([key, value]) => {
+		attr_string += `'${key}': '${value}' `
+	});
+	attr_string = attr_string.slice(0, -1);
+	
+	let children_string = '';
+	obj.children.forEach(child => {
+		children_string += json_object_to_xml_string(child, indent+'\t')+'\n';
+	});
+	
+	let str = `${indent}<${obj.tag} ${attr_string}>${obj.text? `\n${indent}\t`+obj.text : ""}${children_string ? '\n'+children_string+indent : ""}</${obj.tag}>`;
+	return str;
+}
+
 function createInlineList(container, links, prefix="", postfix="", separator=", ") {
 	//container.innerHTML = '';
 
-	container.appendChild(document.createTextNode(prefix));
+	if (prefix) { container.appendChild(document.createTextNode(prefix)); }
 
 	links.forEach((item, index) => {
 		const link = document.createElement('a');
@@ -94,7 +112,7 @@ function createInlineList(container, links, prefix="", postfix="", separator=", 
 		}
 	});
 
-  container.appendChild(document.createTextNode(postfix));
+  if (postfix) { container.appendChild(document.createTextNode(postfix)); }
 }
 
 function get_attribute(obj, attribute_str_or_list, default_value=undefined){
@@ -167,7 +185,7 @@ function renderItemDetails(id){
 	console.log(item.json_data);
 	
 	const translation = queryOne("SELECT * FROM translations WHERE identifier = ?;", [item.nameidentifier ?? item.identifier]);
-		
+	
 	//item name	
 	const name = get_translated_name(item.identifier);
 	if (name) {
@@ -312,6 +330,8 @@ function renderItemDetails(id){
 					
 					ingredient_element.appendChild(document.createTextNode(prefix));
 					ingredient_element.appendChild(link);
+					
+					//todo, list min/max amount in a sublist for each ingredient if usecondition is false
 				}
 				
 				//list required skill
@@ -330,71 +350,121 @@ function renderItemDetails(id){
 				if (requires_recipe === "true"){
 					const recipe_element = fabricate_sublist.appendChild(document.createElement('li'));
 					
+					const unlock_items_rows = queryAll("SELECT unlocker FROM unlock_items WHERE unlockee = ?;", [item.identifier]);
+					const unlock_talents_rows = queryAll("SELECT unlocker FROM unlock_talents WHERE unlockee = ?;", [item.identifier]);
 					
-					//todo: show list of items and talets needed to unlock
-					// const unlock_items_rows = queryAll("SELECT unlocker FROM unlock_items WHERE unlockee = ?;", [item.identifier]);
-					// const unlock_talents_rows = queryAll("SELECT unlocker FROM unlock_talents WHERE unlockee = ?;", [item.identifier]);
+					const items_links = []
+					unlock_items_rows.forEach(row => {
+						items_links.push(({
+							label: get_translated_name(row.unlocker, fallback=row.unlocker),
+							url: `/#item/${row.unlocker}`
+						}))
+					});
 					
-					// const links = []
-					// unlock_items_rows.forEach(row => {
-						// links.append(({
-							// label: `item:${get_translated_name(row.unlocker, fallback=row.unlocker)}`,
-							// url: `/#item/${row.unlocker}`
-						// }))
-					// });
+					const talents_links = []
+					unlock_talents_rows.forEach(row => {
+						talents_links.push(({
+							label: row.unlocker,
+							url: `/#talent/${row.unlocker}`
+						}))
+					});
 					
-					recipe_element.textContent = `Requires learned recipe`;
+					recipe_element.appendChild(document.createTextNode("Required learned recipe"));
+					if (items_links.length > 0){
+						recipe_element.appendChild(document.createTextNode(" from "));
+						createInlineList(recipe_element, items_links, prefix=(items_links.length > 1 ? "one of the items: " : "the item: "));
+					}
+					
+					
+					if (talents_links.length > 0){
+						const text = items_links.length > 0 ? "; or " : " from ";
+						recipe_element.appendChild(document.createTextNode(text)); 
+						createInlineList(recipe_element, talents_links, prefix=(talents_links.length > 1 ? "one of the talents: " : "the talent: "));
+					}
+					
 				}
 			}
 		}
 	}
 	
+	function populate_html_item_list(identifier_list, element_id){		
+		if (identifier_list.length > 0){
+			const element = document.getElementById(element_id);
+			const list_element = element.querySelector('ul');
+			
+			element.classList.remove("hidden");
+			list_element.innerHTML = '';
+			
+			identifier_list.forEach(id => {
+				const li = list_element.appendChild(document.createElement('li'));
+				const link = li.appendChild(document.createElement('a'));
+				link.textContent = get_translated_name(id, fallback=id);
+				link.href = `/#item/${id}`;
+			});
+		}
+	}
+	
 	//recipes the item is used in
-	const output_items = new Set()	
-	//find recipes the item is used in as a tag
+	let output_items = new Set()	
+	//as a tag
 	tags.forEach( tag => {
 		const tag_ingredient_rows = queryAll(`SELECT output FROM tag_ingredients WHERE ingredient = ?`, [tag]);
 		tag_ingredient_rows.forEach( row => {
 			output_items.add(row.output);
 		});				
 	});
-	//find recipes the item is used in as an item
+	//as an item
 	const item_ingredient_rows = queryAll(`SELECT output FROM item_ingredients WHERE ingredient = ?`, [item.identifier]);
 	item_ingredient_rows.forEach( row => {
 		output_items.add(row.output);
 	});
-	
-	if (output_items.size > 0){
-		const used_in_element = document.getElementById("item-ingredient");
-		const used_in_list_element = document.getElementById("ingredient-list");
-		
-		used_in_element.classList.remove("hidden");
-		used_in_list_element.innerHTML = '';
-					
-		const links = [...output_items].forEach(id => {
-			const li = used_in_list_element.appendChild(document.createElement("li"));
-			const link = li.appendChild(document.createElement('a'));
-			link.href = `/#item/${id}`;
-			link.textContent = get_translated_name(id, fallback=id);
-		});		
-	}
-	
-	//todo
+	output_items = [...output_items]
+	populate_html_item_list(output_items, "item-ingredient");
 	
 	//unlocks recipes for
-	
-	//deconstructs into
+	populate_html_item_list(
+		queryAll("SELECT unlockee FROM unlock_items WHERE unlocker = ?;", [item.identifier]).map(row => row.unlockee), 
+		"item-unlock"
+	);
 	
 	//deconstructs from
+	populate_html_item_list(
+		queryAll("SELECT input FROM deconstructables WHERE output = ?;", [item.identifier]).map(row => row.input),
+		"item-deconstruct-from"
+	);
 	
 	//spawns
+	populate_html_item_list(
+		queryAll("SELECT spawnee FROM spawners WHERE spawner = ?;", [item.identifier]).map(row => row.spawnee),
+		"item-spawner"
+	);
+	
+	//spawned from
+	populate_html_item_list(
+		queryAll("SELECT spawner FROM spawners WHERE spawnee = ?;", [item.identifier]).map(row => row.spawner),
+		"item-spawnee"
+	);
 	
 	//fabricator for
+	populate_html_item_list(
+		queryAll("SELECT item FROM suitable_fabricators WHERE fabricator = ?;", [item.identifier]).map(row => row.item),
+		"item-fabricator"
+	);
+	
+	//todo	
+	//deconstructs into
+	
+	//show xml
+	const item_json_element = document.getElementById("item-json");
+	const item_json_text_element = item_json_element.querySelector("p");
+	item_json_element.classList.remove('hidden');
+	item_json_text_element.textContent = json_object_to_xml_string(item.json_data);
 }
 
+function renderTagDetails(id){
+}
 
-
-function renderTagDetails(identifier){
+function renderTalentDetails(id){
 }
 
 function renderIndexDetails(){
